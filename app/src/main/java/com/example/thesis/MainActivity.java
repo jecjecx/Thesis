@@ -18,6 +18,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -30,6 +32,11 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.content.Context;
+
+import com.example.thesis.ml.Model;
+
+import org.tensorflow.lite.DataType;
+import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
 
 
 public class MainActivity extends Activity {
@@ -120,6 +127,7 @@ public class MainActivity extends Activity {
 
 
                             }
+                            doInference(data);
                             showToast(message.toString());
 
                         } else {
@@ -132,6 +140,49 @@ public class MainActivity extends Activity {
             }
         });
     }
+
+public void doInference(List<String[]> myArray)
+{
+    try {
+        Model model = Model.newInstance(getApplicationContext());
+
+        // Creates inputs for reference.
+        TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{1, 215}, DataType.FLOAT32);
+
+        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(4 * myArray.get(1).length);
+        byteBuffer.order(ByteOrder.nativeOrder());
+
+        for (int i = 0; i < myArray.get(1).length; i++) {
+            byteBuffer.putFloat(Float.parseFloat(myArray.get(1)[i]));
+        }
+
+        inputFeature0.loadBuffer(byteBuffer);
+
+        // Runs model inference and gets result.
+        Model.Outputs outputs = model.process(inputFeature0);
+        TensorBuffer outputFeature0 = outputs.getOutputFeature0AsTensorBuffer();
+
+        float[] confidences = outputFeature0.getFloatArray();
+
+        int maxPos = 0;
+        float maxConfidence = 0;
+        for (int i = 0; i < confidences.length; i++) {
+
+            if (confidences[i] > maxConfidence) {
+                maxConfidence = confidences[i];
+                maxPos = i;
+            }
+        }
+
+        String[] classes = {"Benign", "Malicious"};
+        System.out.println(classes[maxPos]);
+
+        // Releases model resources if no longer used.
+        model.close();
+    } catch (IOException e) {
+        // TODO Handle the exception
+    }
+}
 
     public String[] getAppPermissions(Context context, String packageName) {
         try {
