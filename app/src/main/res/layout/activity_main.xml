@@ -44,7 +44,12 @@
         android:weightSum="100"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        tools:layout_editor_absoluteY="341dp" />
+        tools:layout_editor_absoluteY="341dp"
+        />
+    <ListView
+    android:id="@+id/listView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
 
     <TextView
         android:id="@+id/testView"

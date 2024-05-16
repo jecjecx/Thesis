@@ -49,6 +49,7 @@ public class FileExplorerActivity extends AppCompatActivity {
                 if (file.isDirectory()) {
                     currentDirectory = file; // Update current directory
                     listFiles(currentDirectory); // Open directory
+
                 } else {
                     Toast.makeText(FileExplorerActivity.this, "File: " + selectedFile, Toast.LENGTH_SHORT).show();
                 }
